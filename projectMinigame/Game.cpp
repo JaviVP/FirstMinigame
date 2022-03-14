@@ -74,6 +74,9 @@ bool Game::LoadAudios() {
 
 	Mix_PlayMusic(tracks[0], -1);
 
+	// set channel 2 to half volume
+	Mix_VolumeMusic(2);
+
 	sfxs[num_sfxs++] = Mix_LoadWAV("sample_wav.wav");
 
 	return true;
@@ -310,6 +313,7 @@ bool Game::Update()
 
 		// Play a single Sound
 		Mix_PlayChannel(-1, sfxs[0], 0);
+		Mix_Volume(-1, MIX_MAX_VOLUME / 25);
 	}
 	//Bullet Delay
 	if (bullet_delay_c < BULLET_DELAY) {
