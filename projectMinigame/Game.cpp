@@ -15,7 +15,7 @@ bool Game::Init()
 		return false;
 	}
 	//Create our window: title, x, y, w, h, flags
-	Window = SDL_CreateWindow("Spaceship: arrow keys + space, f1: god mode, F2: Disable enemies (dont press)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	Window = SDL_CreateWindow("2d Shotter: wasd + right_click, f1: Show Hitboxes, F2: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 	if (Window == NULL)
 	{
 		SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -321,7 +321,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(2);
+				Enemy[i].EnemyHPloss(10);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 				if (Enemy[i].GetEnemyHP() <= 0) {

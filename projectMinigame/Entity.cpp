@@ -11,13 +11,13 @@ void Entity::Init(int posx, int posy, int w, int h, int s, float posx2, float po
 {
 	x = posx;
 	y = posy;
-	HP = 40;
 	width = w;
 	height = h;
 	speed = s;
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
+	HP = 100;
 
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
