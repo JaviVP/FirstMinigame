@@ -313,7 +313,7 @@ bool Game::Update()
 
 		// Play a single Sound
 		Mix_PlayChannel(-1, sfxs[0], 0);
-		Mix_Volume(-1, MIX_MAX_VOLUME / 25);
+		Mix_Volume(-1, MIX_MAX_VOLUME / 40);
 	}
 	//Bullet Delay
 	if (bullet_delay_c < BULLET_DELAY) {
