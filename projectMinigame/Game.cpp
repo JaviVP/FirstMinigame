@@ -64,8 +64,11 @@ bool Game::Init()
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
+	Score1.Init(WINDOW_WIDTH-80, WINDOW_HEIGHT-80, 64, 64, 0,NULL, NULL,NULL, NULL);
+	Score2.Init(WINDOW_WIDTH - 150, WINDOW_HEIGHT - 80, 64, 64, 0, NULL, NULL, NULL, NULL);
+
 	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 4,NULL, NULL, NULL, NULL);
-	Score.Init(WINDOW_WIDTH-80, WINDOW_HEIGHT-80, 64, 64, 0,NULL, NULL,NULL, NULL);
+
 	god_mode = false;
 	return true;
 }
@@ -356,7 +359,7 @@ bool Game::Input()
 	SDL_Event event;
 	if (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT || score == 10)	return false;
+		if (event.type == SDL_QUIT || score == 30)	return false;
 	}
 
 	SDL_PumpEvents();
@@ -552,7 +555,7 @@ bool Game::Update()
 
 bool Game::Dead(int _num)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 30; i++)
 	{
 		if (enemyDead[i] == _num)
 		{
@@ -567,6 +570,7 @@ bool Game::Dead(int _num)
 void Game::Draw()
 {
 	SDL_Rect rc;
+	SDL_Rect rc2;
 
 	//Set the color used for drawing operations
 	SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
@@ -773,41 +777,81 @@ void Game::Draw()
 	}
 
 	//Draw score
-	Score.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+	Score1.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+	Score2.GetRect(&rc2.x, &rc2.y, &rc2.w, &rc2.h);
 
 	switch (score)
 	{
-	case 0:
+	case 0: case 10: case 20:
 		SDL_RenderCopy(Renderer, img_Zero, NULL, &rc);
+		if (score == 10)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 20)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 1:
+	case 1: case 11:case 21:
 		SDL_RenderCopy(Renderer, img_One, NULL, &rc);
+		if (score == 11)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 21)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 2:
+	case 2:case 12:case 22:
 		SDL_RenderCopy(Renderer, img_Two, NULL, &rc);
+		if (score == 12)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 22)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 3:
+	case 3:case 13:case 23:
 		SDL_RenderCopy(Renderer, img_Three, NULL, &rc);
+		if (score == 13)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 23)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 4:
+	case 4:case 14:case 24:
 		SDL_RenderCopy(Renderer, img_Four, NULL, &rc);
+		if (score == 14)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 24)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 5:
+	case 5:case 15:case 25:
 		SDL_RenderCopy(Renderer, img_Five, NULL, &rc);
+		if (score == 15)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 25)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 6:
+	case 6:case 16:case 26:
 		SDL_RenderCopy(Renderer, img_Six, NULL, &rc);
+		if (score == 16)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 26)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 7:
+	case 7:case 17:case 27:
 		SDL_RenderCopy(Renderer, img_Seven, NULL, &rc);
+		if (score == 17)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 27)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 8:
+	case 8:case 18:case 28:
 		SDL_RenderCopy(Renderer, img_Eight, NULL, &rc);
+		if (score == 18)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 28)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-	case 9:
+	case 9:case 19:case 29:
 		SDL_RenderCopy(Renderer, img_Nine, NULL, &rc);
+		if (score == 19)
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+		if (score == 29)
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
 		break;
-
 	}
 
 	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
