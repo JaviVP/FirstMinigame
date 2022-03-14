@@ -82,7 +82,7 @@ void Entity::ResetEnemyPos()
 }
 int Entity::PlayerHPloss()
 {
-	int i = 3;
+	int i = 4;
 	for (int i = 2; i > -1; i--) {
 		if (PlayerHP[i] == 1) {
 			PlayerHP[i] = 0;
