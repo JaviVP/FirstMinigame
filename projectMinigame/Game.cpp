@@ -64,7 +64,7 @@ bool Game::Init()
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
-	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
+	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
 	god_mode = false;
 	return true;
 }
