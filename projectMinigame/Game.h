@@ -45,16 +45,16 @@ private:
 		, * img_Five, * img_Four, * img_Six, * img_Seven, * img_Eight, * img_Nine, *img_GameOver;
 	Uint32 buttons; 
 
-	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES], Heart[MAX_HEARTS],Score;
+	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES], Heart[MAX_HEARTS],Score1,Score2;
 	int idx_shot;
 	int idx_Enemy;
 	int idx_Heart;
 
 	int mouseX, mouseY;
 
-	int enemyDead[11]{ 11,11,11,11,11,11,11,11,11,11,11 };
+	int enemyDead[31]{ 31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31 };
 	int scoreDead = 0;
-	int score;
+	int score = 0;
 
 	bool god_mode;
 
