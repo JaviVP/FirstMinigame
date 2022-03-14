@@ -42,7 +42,7 @@ private:
 	SDL_Renderer *Renderer;
 	SDL_Texture *img_background, *img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, *img_shot, *img_Heart, *img_EmptyHeart,
 		*img_Enemy_N, *img_Enemy_S, * img_Enemy_E, * img_Enemy_W, * img_Enemy_NW, * img_Enemy_NE, * img_Enemy_SW, * img_Enemy_SE,* img_One, * img_Zero, * img_Two, * img_Three
-		, * img_Five, * img_Four, * img_Six, * img_Seven, * img_Eight, * img_Nine;;
+		, * img_Five, * img_Four, * img_Six, * img_Seven, * img_Eight, * img_Nine, *img_GameOver;
 	Uint32 buttons; 
 
 	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES], Heart[MAX_HEARTS],Score;

@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <Windows.h>
 
 Game::Game() {}
 Game::~Game(){}
@@ -63,8 +64,13 @@ bool Game::Init()
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
+
 	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
 	Score.Init(WINDOW_WIDTH-80, WINDOW_HEIGHT-80, 64, 64, 0,NULL, NULL,NULL);
+
+	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
+
+
 	god_mode = false;
 	return true;
 }
@@ -189,6 +195,11 @@ bool Game::LoadImages()
 	}
 	img_Enemy_W = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(west).png"));
 	if (img_Enemy_W == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_GameOver = SDL_CreateTextureFromSurface(Renderer, IMG_Load("game_over.png"));
+	if (img_GameOver == NULL) {
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
@@ -375,8 +386,10 @@ bool Game::Update()
 		idx_shot %= MAX_SHOTS;
 
 		// Play a single Sound
-		Mix_PlayChannel(-1, sfxs[0], 0);
-		Mix_Volume(-1, MIX_MAX_VOLUME / 40);
+		if (HPcounter > 0) {
+			Mix_PlayChannel(-1, sfxs[0], 0);
+			Mix_Volume(-1, MIX_MAX_VOLUME / 40);
+		}
 	}
 	//Bullet Delay
 	if (bullet_delay_c < BULLET_DELAY) {
@@ -517,100 +530,108 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	
 	//Draw player
-	Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-	if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
-		SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+	if (HPcounter>0) {
+		Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
+			SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) < 0)) {
+			SDL_RenderCopy(Renderer, img_player_S, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) > 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
+			SDL_RenderCopy(Renderer, img_player_W, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) < 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
+			SDL_RenderCopy(Renderer, img_player_E, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) > 0))) {
+			SDL_RenderCopy(Renderer, img_player_NW, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) > 0))) {
+			SDL_RenderCopy(Renderer, img_player_NE, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) < 0))) {
+			SDL_RenderCopy(Renderer, img_player_SW, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
+		else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) < 0))) {
+			SDL_RenderCopy(Renderer, img_player_SE, NULL, &rc);
+			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		}
 	}
-	else if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) < 0)) {
-		SDL_RenderCopy(Renderer, img_player_S, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX() - mouseX) > 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
-		SDL_RenderCopy(Renderer, img_player_W, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX() - mouseX) < 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
-		SDL_RenderCopy(Renderer, img_player_E, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX()-mouseX)>0) && (((Player.GetY() - mouseY)>0))) {
-		SDL_RenderCopy(Renderer, img_player_NW, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) > 0))) {
-		SDL_RenderCopy(Renderer, img_player_NE, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) < 0))) {
-		SDL_RenderCopy(Renderer, img_player_SW, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
-	else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) < 0))) {
-		SDL_RenderCopy(Renderer, img_player_SE, NULL, &rc);
-		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-	}
+	
 	
 
 	//Draw shots
-	for (int i = 0; i < MAX_SHOTS; ++i)
-	{
-		if (Shots[i].IsAlive())
+	if (HPcounter>0) {
+		for (int i = 0; i < MAX_SHOTS; ++i)
 		{
-			Shots[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_shot, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			if (Shots[i].IsAlive())
+			{
+				Shots[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_shot, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
 		}
 	}
 
 	//Draw enemies
-	for (int i = 0; i < MAX_ENEMIES; ++i)
-	{
-		if (Enemy[i].IsAlive())
+	if (HPcounter > 0) {
+		for (int i = 0; i < MAX_ENEMIES; ++i)
 		{
-			if (fabs((Enemy[i].GetX()-Player.GetX())) <=50 && (Enemy[i].GetY()-Player.GetY()) < 0 ) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_S, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			if (Enemy[i].IsAlive())
+			{
+				if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_S, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_N, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_W, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_E, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_NW, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_NE, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_SW, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+				else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+					Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Enemy_SE, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+				}
+
 			}
-			else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_N, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_W, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_E, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_NW, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_NE, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_SW, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Enemy_SE, NULL, &rc);
-				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-			}
-			
 		}
 	}
+	
 
 	//Draw Heart
 	if (HPcounter == 3) {
@@ -642,7 +663,14 @@ void Game::Draw()
 		}
 	}
 
-	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+	//Draw game over
+	if (HPcounter <= 0) {
+		rc.x = 300;
+		rc.y = 100;
+		rc.h = 500;
+		rc.w = 400;
+		SDL_RenderCopy(Renderer, img_GameOver, NULL, &rc);
+	}
 
 	//Draw score
 	Score.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
@@ -681,6 +709,8 @@ void Game::Draw()
 		break;
 
 	}
+
+	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 
 	//Update screen
 	SDL_RenderPresent(Renderer);
