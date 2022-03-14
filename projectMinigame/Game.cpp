@@ -433,7 +433,7 @@ bool Game::Update()
 		idx_shot %= MAX_SHOTS;
 
 		// Play a single Sound
-		if (HPcounter > 0) {
+		if (HPcounter > 0 && score <30) {
 			Mix_PlayChannel(-1, sfxs[0], 0);
 			Mix_Volume(-1, MIX_MAX_VOLUME / 40);
 		}
@@ -587,7 +587,7 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	
 	//Draw player
-	if (HPcounter>0) {
+	if (HPcounter>0 && score < 30) {
 		Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 		if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
 			SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
@@ -626,7 +626,7 @@ void Game::Draw()
 	
 
 	//Draw shots
-	if (HPcounter>0) {
+	if (HPcounter>0 && score < 30) {
 		for (int i = 0; i < MAX_SHOTS; ++i)
 		{
 			if (Shots[i].IsAlive())
@@ -639,7 +639,7 @@ void Game::Draw()
 	}
 
 	//Draw enemies
-	if (HPcounter > 0) {
+	if (HPcounter > 0 && score < 30) {
 		for (int i = 0; i < MAX_ENEMIES; ++i)
 		{
 			if (Enemy[i].IsAlive())
@@ -768,7 +768,7 @@ void Game::Draw()
 	}
 
 	//Draw game over
-	if (HPcounter <= 0) {
+	if (HPcounter <= 0 || score >=30) {
 		rc.x = 300;
 		rc.y = 100;
 		rc.h = 500;
