@@ -64,10 +64,6 @@ void Entity::Move(float dx, float dy)
 	x += dx * speed;
 	y += dy * speed;
 }
-void Entity::Stop()
-{
-	speed = 0;
-}
 int Entity::GetEnemyHP()
 {
 	return hitPoints;

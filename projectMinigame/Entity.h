@@ -16,7 +16,6 @@ public:
 	void ShutDown(); 
 	bool IsAlive();
 	void Move(float dx, float dy);
-	void Stop();
     int GetEnemyHP();
 	void EnemyHPloss(int dmg);
 	void ResetEnemyPos();
@@ -25,7 +24,7 @@ public:
 private:
 	float x, y;
 	int width, height;
-	float speed;
+	int speed;
 	int hitPoints;
 	bool is_alive;
 	int enemyType; // 1-Green, 2-Blue
