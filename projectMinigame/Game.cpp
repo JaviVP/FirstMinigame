@@ -58,6 +58,7 @@ bool Game::Init()
 	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3,NULL, NULL, NULL);
 	for (int i = 0; i < 3; i++) {
 		Heart[i].Init(0 + counter, 700, 64, 64, 3, NULL, NULL, NULL);
+		counter += 66;
 	}
 	idx_shot = 0;
 	int w;
