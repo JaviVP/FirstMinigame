@@ -7,7 +7,7 @@ Entity::Entity()
 Entity::~Entity()
 {
 }
-void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, float posy2) 
+void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, float posy2, int et) 
 {
 	x = posx;
 	y = posy;
@@ -18,6 +18,7 @@ void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, 
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
+	enemyType = et;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
@@ -79,4 +80,8 @@ void Entity::ResetEnemyPos()
 {
 	x = -100;
 	y = -100;
+}
+int Entity::getEnemyType()
+{
+	return enemyType;
 }

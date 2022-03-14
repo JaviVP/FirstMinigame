@@ -41,7 +41,8 @@ private:
 	SDL_Window *Window;
 	SDL_Renderer *Renderer;
 	SDL_Texture *img_background, *img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, *img_shot, *img_Heart, *img_EmptyHeart,
-		*img_Enemy_N, *img_Enemy_S, * img_Enemy_E, * img_Enemy_W, * img_Enemy_NW, * img_Enemy_NE, * img_Enemy_SW, * img_Enemy_SE, *img_GameOver;
+		*img_GreenEnemy_N, *img_GreenEnemy_S, * img_GreenEnemy_E, * img_GreenEnemy_W, * img_GreenEnemy_NW, * img_GreenEnemy_NE, * img_GreenEnemy_SW, * img_GreenEnemy_SE,
+		* img_BlueEnemy_N, * img_BlueEnemy_S, * img_BlueEnemy_E, * img_BlueEnemy_W, * img_BlueEnemy_NW, * img_BlueEnemy_NE, * img_BlueEnemy_SW, * img_BlueEnemy_SE, * img_GameOver;
 	Uint32 buttons; 
 
 	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES], Heart[MAX_HEARTS];
