@@ -5,7 +5,7 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0;
+int Enemy_delay = 0, counter = 0;
 
 bool Game::Init()
 {
@@ -55,6 +55,10 @@ bool Game::Init()
 	//Init variables
 	//size: 104x82
 	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3, NULL, NULL);
+	for (int i = 0; i < 3; i++) {
+		Heart[i].Init(-32 + counter, 680, 128, 128, 3, NULL, NULL);
+		counter += 66;
+	}
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
@@ -131,6 +135,17 @@ bool Game::LoadImages()
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
+	//Hearts texture
+	img_Heart = SDL_CreateTextureFromSurface(Renderer, IMG_Load("SpriteHeart.png"));
+	if (img_Heart == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_EmptyHeart = SDL_CreateTextureFromSurface(Renderer, IMG_Load("SpriteHeartVacio.png"));
+	if (img_EmptyHeart == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
 	//Enemy texture
 	img_Enemy = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(south).png"));
 	if (img_Enemy == NULL) {
@@ -154,6 +169,8 @@ void Game::Release()
 	SDL_DestroyTexture(img_player_SE);
 	SDL_DestroyTexture(img_shot);
 	SDL_DestroyTexture(img_Enemy);
+	SDL_DestroyTexture(img_Heart);
+	SDL_DestroyTexture(img_EmptyHeart);
 	IMG_Quit();
 	
 	// Free Audios
@@ -350,7 +367,13 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	rc.x += rc.w;
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
+	//Draw Heart
+	for (int i = 0; i < 3; i++) {
+		Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+	}
 	
+	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 	//Draw player
 	Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 	if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
