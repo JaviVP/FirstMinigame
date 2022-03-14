@@ -17,6 +17,7 @@ void Entity::Init(int posx, int posy, int w, int h, int s, float posx2, float po
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
+	HP = 200;
 	PlayerHP[0] = 1, PlayerHP[1] = 1, PlayerHP[2] = 1;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
