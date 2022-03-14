@@ -11,15 +11,13 @@ void Entity::Init(int posx, int posy, int w, int h, int s, float posx2, float po
 {
 	x = posx;
 	y = posy;
-	HP = 40;
 	width = w;
 	height = h;
 	speed = s;
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
-	PlayerHP[3];
-
+	PlayerHP[0] = 1, PlayerHP[1] = 1, PlayerHP[2] = 1;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
@@ -82,7 +80,20 @@ void Entity::ResetEnemyPos()
 	x = -100;
 	y = -100;
 }
-int Entity::PlayerHPloss(int dmg)
+int Entity::PlayerHPloss()
 {
-	return 0;
+	int i = 4;
+	for (int i = 2; i > -1; i--) {
+		if (PlayerHP[i] == 1) {
+			PlayerHP[i] = 0;
+			i--;
+			return i;
+		}
+		if (PlayerHP[i] == 0) {
+			i--;
+		}
+		if (PlayerHP[0] == 0) {
+			return 0;
+		}
+	}
 }

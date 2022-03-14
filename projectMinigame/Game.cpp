@@ -5,7 +5,7 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0, counter = 0;
+int Enemy_delay = 0, counter = 0, HPcounter = 3, aux = 0, auxCounter = 0, toggleH = 0;
 
 bool Game::Init()
 {
@@ -15,7 +15,7 @@ bool Game::Init()
 		return false;
 	}
 	//Create our window: title, x, y, w, h, flags
-	Window = SDL_CreateWindow("Spaceship: arrow keys + space, f1: god mode, F2: Disable enemies (dont press)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	Window = SDL_CreateWindow("2d Shotter: wasd + right_click, f1: Show Hitboxes, F2: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 	if (Window == NULL)
 	{
 		SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -260,6 +260,7 @@ bool Game::Update()
 	if (keys[SDL_SCANCODE_ESCAPE] == KEY_DOWN)	return true;
 	if (keys[SDL_SCANCODE_F1] == KEY_DOWN)		god_mode = !god_mode;
 	if (keys[SDL_SCANCODE_F2] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
+	if (keys[SDL_SCANCODE_F3] == KEY_DOWN)		toggleH++;
 	if (keys[SDL_SCANCODE_W] == KEY_REPEAT && Player.GetY() > 0) fy = -1;
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
@@ -369,7 +370,7 @@ bool Game::Update()
 
 		if (Enemy[i].IsAlive())
 		{
-			Enemy[i].Move(((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX(), 2)));
+			Enemy[i].Move(((Player.GetX() + 16) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)));
 		}
 	}
 	//Enemy kill
@@ -380,7 +381,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(2);
+				Enemy[i].EnemyHPloss(10);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 				if (Enemy[i].GetEnemyHP() <= 0) {
@@ -389,6 +390,26 @@ bool Game::Update()
 				}
 			}
 		}
+	}
+	//Player kill
+	for (int i = 0; i < idx_Enemy; i++) {
+		int enemy_x, enemy_y, enemy_w, enemy_h;
+		Enemy[i].GetRect(&enemy_x, &enemy_y, &enemy_w, &enemy_h);
+		int player_x, player_y, player_w, player_h;
+		Player.GetRect(&player_x, &player_y, &player_w, &player_h);
+		if (((player_x >= enemy_x && player_x <= enemy_w + enemy_x) || (player_w + player_x >= enemy_x && player_w + player_x <= enemy_w + enemy_x)) && ((player_y >= enemy_y && player_y <= enemy_h + enemy_y) || (player_h + player_y >= enemy_y && player_h + player_y <= enemy_h + enemy_y))) {
+			if (aux == 0) {
+				HPcounter = Player.PlayerHPloss();
+				aux = 1;
+			}
+		}
+	}
+	if (aux == 1) {
+		auxCounter++;
+	}
+	if (auxCounter == 250) {
+		aux = 0;
+		auxCounter = 0;
 	}
 	return false;
 }
@@ -410,9 +431,33 @@ void Game::Draw()
 	rc.x += rc.w;
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	//Draw Heart
-	for (int i = 0; i < 3; i++) {
-		Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+	if (HPcounter == 3) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 2) {
+		for (int i = 0; i < 2; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+	}
+	if (HPcounter == 1) {
+		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		for (int i = 1; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 0) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
 	}
 	
 	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
