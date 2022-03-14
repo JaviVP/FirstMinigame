@@ -19,7 +19,7 @@ public:
 	void Stop();
     int GetEnemyHP();
 	void EnemyHPloss(int dmg);
-	int PlayerHPloss(int dmg);
+	int PlayerHPloss();
 	void ResetEnemyPos();
 
 private:
