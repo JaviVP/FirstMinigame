@@ -327,7 +327,7 @@ bool Game::Update()
 
 		if (Enemy[i].IsAlive())
 		{
-			Enemy[i].Move(((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + PLAYER_CENTER) - Enemy[i].GetX(), 2)));
+			Enemy[i].Move(((Player.GetX() + 16) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)));
 		}
 	}
 	//Enemy kill

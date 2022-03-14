@@ -16,7 +16,6 @@
 #define MAX_KEYS		256
 #define MAX_SHOTS		128
 #define MAX_ENEMIES		257 //This number must be one higher of the desired enemies
-#define PLAYER_CENTER   20
 #define BULLET_DELAY	10
 #define ENEMY_DELAY 	200
 #define MAX_TRACKS		10
