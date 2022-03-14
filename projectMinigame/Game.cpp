@@ -5,7 +5,8 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0, counter = 0, HPcounter = 3, aux = 0, auxCounter = 0, toggleH = 0;
+int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0;
+bool aux = true;
 
 bool Game::Init()
 {
@@ -260,7 +261,6 @@ bool Game::Update()
 	if (keys[SDL_SCANCODE_ESCAPE] == KEY_DOWN)	return true;
 	if (keys[SDL_SCANCODE_F1] == KEY_DOWN)		god_mode = !god_mode;
 	if (keys[SDL_SCANCODE_F2] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
-	if (keys[SDL_SCANCODE_F3] == KEY_DOWN)		toggleH++;
 	if (keys[SDL_SCANCODE_W] == KEY_REPEAT && Player.GetY() > 0) fy = -1;
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
@@ -398,19 +398,20 @@ bool Game::Update()
 		int player_x, player_y, player_w, player_h;
 		Player.GetRect(&player_x, &player_y, &player_w, &player_h);
 		if (((player_x >= enemy_x && player_x <= enemy_w + enemy_x) || (player_w + player_x >= enemy_x && player_w + player_x <= enemy_w + enemy_x)) && ((player_y >= enemy_y && player_y <= enemy_h + enemy_y) || (player_h + player_y >= enemy_y && player_h + player_y <= enemy_h + enemy_y))) {
-			if (aux == 0) {
-				HPcounter = Player.PlayerHPloss();
-				aux = 1;
+			if (aux == true) {
+				HPcounter--;
+				aux = false;
 			}
 		}
 	}
-	if (aux == 1) {
-		auxCounter++;
+	if (aux == false) {
+		auxC++;
 	}
-	if (auxCounter == 250) {
-		aux = 0;
-		auxCounter = 0;
+	if (auxC == 200) {
+		aux = true;
+		auxC = 0;
 	}
+	
 	return false;
 }
 void Game::Draw()
