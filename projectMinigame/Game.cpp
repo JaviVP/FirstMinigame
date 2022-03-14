@@ -147,8 +147,43 @@ bool Game::LoadImages()
 		return false;
 	}
 	//Enemy texture
-	img_Enemy = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(south).png"));
-	if (img_Enemy == NULL) {
+	img_Enemy_S = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(south).png"));
+	if (img_Enemy_S == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_N = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(north).png"));
+	if (img_Enemy_N == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_SE = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(south-east).png"));
+	if (img_Enemy_SE == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_SW = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(south-west).png"));
+	if (img_Enemy_SW == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_NE = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(north-east).png"));
+	if (img_Enemy_NE == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_NW = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(north-west).png"));
+	if (img_Enemy_NW == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_E = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(east).png"));
+	if (img_Enemy_E == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Enemy_W = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreenEnemy(west).png"));
+	if (img_Enemy_W == NULL) {
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
@@ -168,7 +203,14 @@ void Game::Release()
 	SDL_DestroyTexture(img_player_SW);
 	SDL_DestroyTexture(img_player_SE);
 	SDL_DestroyTexture(img_shot);
-	SDL_DestroyTexture(img_Enemy);
+	SDL_DestroyTexture(img_Enemy_S);
+	SDL_DestroyTexture(img_Enemy_E);
+	SDL_DestroyTexture(img_Enemy_W);
+	SDL_DestroyTexture(img_Enemy_N);
+	SDL_DestroyTexture(img_Enemy_NE);
+	SDL_DestroyTexture(img_Enemy_NW);
+	SDL_DestroyTexture(img_Enemy_SE);
+	SDL_DestroyTexture(img_Enemy_SW);
 	SDL_DestroyTexture(img_Heart);
 	SDL_DestroyTexture(img_EmptyHeart);
 	IMG_Quit();
@@ -426,9 +468,47 @@ void Game::Draw()
 	{
 		if (Enemy[i].IsAlive())
 		{
-			Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Enemy, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			if (fabs((Enemy[i].GetX()-Player.GetX())) <=50 && (Enemy[i].GetY()-Player.GetY()) < 0 ) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_S, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_N, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_W, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_E, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_NW, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_NE, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_SW, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+				Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Enemy_SE, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			
 		}
 	}
 
