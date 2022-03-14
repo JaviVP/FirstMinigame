@@ -19,9 +19,11 @@ public:
 	void Stop();
     int GetEnemyHP();
 	void EnemyHPloss(int dmg);
+	int PlayerHPloss(int dmg);
 	void ResetEnemyPos();
 
 private:
+	int PlayerHP[3] = { 1,1,1 };
 	float x, y;
 	int width, height, HP;
 	float speed;

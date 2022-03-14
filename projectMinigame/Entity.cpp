@@ -18,7 +18,7 @@ void Entity::Init(int posx, int posy, int w, int h, int s, float posx2, float po
 	x_shot = posx2;
 	y_shot = posy2;
 	HP = 100;
-
+	PlayerHP[3];
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
@@ -80,4 +80,8 @@ void Entity::ResetEnemyPos()
 {
 	x = -100;
 	y = -100;
+}
+int Entity::PlayerHPloss(int dmg)
+{
+	return 0;
 }

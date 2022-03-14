@@ -20,6 +20,8 @@
 #define BULLET_DELAY	10
 #define ENEMY_DELAY 	200
 #define MAX_TRACKS		10
+#define MAX_HEARTS		3
+
 
 class Game
 {
@@ -39,12 +41,13 @@ public:
 private:
 	SDL_Window *Window;
 	SDL_Renderer *Renderer;
-	SDL_Texture *img_background, *img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, *img_shot, *img_Enemy;
+	SDL_Texture *img_background, *img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, *img_shot, *img_Enemy, *img_Heart, *img_EmptyHeart;
 	Uint32 buttons; 
 
-	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES];
+	Entity Player, Shots[MAX_SHOTS], Scene, Enemy[MAX_ENEMIES], Heart[MAX_HEARTS];
 	int idx_shot;
 	int idx_Enemy;
+	int idx_Heart;
 
 	int mouseX, mouseY;
 
