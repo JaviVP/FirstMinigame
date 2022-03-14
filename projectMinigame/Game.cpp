@@ -54,15 +54,15 @@ bool Game::Init()
 
 	//Init variables
 	//size: 104x82
-	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3, NULL, NULL);
+	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3,NULL, NULL, NULL);
 	for (int i = 0; i < 3; i++) {
-		Heart[i].Init(-32 + counter, 680, 128, 128, 3, NULL, NULL);
+		Heart[i].Init(-32 + counter, 680, 128, 128, 3,NULL, NULL, NULL);
 		counter += 66;
 	}
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
-	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4, NULL, NULL);
+	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
 	god_mode = false;
 	return true;
 }
@@ -304,7 +304,7 @@ bool Game::Update()
 			offsetX = 46;
 			offsetY = 48;
 		}
-		Shots[idx_shot].Init(x + offsetX, y + offsetY, 12, 12, 10, (mouseX - (x + offsetX)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)), (mouseY - (y + offsetY)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)));
+		Shots[idx_shot].Init(x + offsetX, y + offsetY, 12, 12, 10, NULL, (mouseX - (x + offsetX)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)), (mouseY - (y + offsetY)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)));
 		idx_shot++;
 		idx_shot %= MAX_SHOTS;
 
@@ -337,7 +337,7 @@ bool Game::Update()
 				y = WINDOW_HEIGHT;
 				x = val3;
 			}
-			Enemy[idx_Enemy].Init(x, y, 32, 64, 1, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)));
+			Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 100,(Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)));
 			idx_Enemy++;
 			idx_Enemy %= MAX_ENEMIES;
 	}
