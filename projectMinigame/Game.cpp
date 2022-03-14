@@ -56,7 +56,7 @@ bool Game::Init()
 
 	//Init variables
 	//size: 104x82
-	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3,NULL, NULL, NULL, NULL);
+	Player.Init((WINDOW_WIDTH >> 1) - 16, (WINDOW_HEIGHT >> 1) -16, 64, 64, 3,NULL, NULL, NULL, NULL);
 	for (int i = 0; i < 3; i++) {
 		Heart[i].Init(0 + counter, 700, 64, 64, 3, NULL, NULL, NULL, NULL);
 		counter += 66;

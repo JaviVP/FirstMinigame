@@ -17,7 +17,7 @@
 #define MAX_SHOTS		128
 #define MAX_ENEMIES		257 //This number must be one higher of the desired enemies
 #define BULLET_DELAY	10
-#define ENEMY_DELAY 	200
+#define ENEMY_DELAY 	100
 #define MAX_TRACKS		10
 #define MAX_HEARTS		3
 
