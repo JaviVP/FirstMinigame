@@ -55,15 +55,14 @@ bool Game::Init()
 
 	//Init variables
 	//size: 104x82
-	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3, NULL, NULL);
+	Player.Init(20, WINDOW_HEIGHT >> 1, 64, 64, 3,NULL, NULL, NULL);
 	for (int i = 0; i < 3; i++) {
-		Heart[i].Init(0 + counter, 700, 64, 64, 3, NULL, NULL);
-		counter += 66;
+		Heart[i].Init(0 + counter, 700, 64, 64, 3, NULL, NULL, NULL);
 	}
 	idx_shot = 0;
 	int w;
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
-	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4, NULL, NULL);
+	Scene.Init(0, 0, w, WINDOW_HEIGHT, 4,NULL, NULL, NULL);
 	god_mode = false;
 	return true;
 }
@@ -307,7 +306,7 @@ bool Game::Update()
 			offsetX = 46;
 			offsetY = 48;
 		}
-		Shots[idx_shot].Init(x + offsetX, y + offsetY, 12, 12, 10, (mouseX - (x + offsetX)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)), (mouseY - (y + offsetY)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)));
+		Shots[idx_shot].Init(x + offsetX, y + offsetY, 12, 12, 10, NULL, (mouseX - (x + offsetX)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)), (mouseY - (y + offsetY)) / sqrt(pow(mouseY - (y + offsetY), 2) + pow(mouseX - (x + offsetX), 2)));
 		idx_shot++;
 		idx_shot %= MAX_SHOTS;
 
@@ -341,7 +340,7 @@ bool Game::Update()
 				y = WINDOW_HEIGHT;
 				x = val3;
 			}
-			Enemy[idx_Enemy].Init(x, y, 32, 64, 1, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)));
+			Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 100,(Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)));
 			idx_Enemy++;
 			idx_Enemy %= MAX_ENEMIES;
 	}
@@ -435,37 +434,7 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	rc.x += rc.w;
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
-	//Draw Heart
-	if (HPcounter == 3) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		}
-	}
-	if (HPcounter == 2) {
-		for (int i = 0; i < 2; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		}
-		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-	}
-	if (HPcounter == 1) {
-		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		for (int i = 1; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-		}
-	}
-	if (HPcounter == 0) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-		}
-	}
 	
-	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 	//Draw player
 	Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 	if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
@@ -561,6 +530,38 @@ void Game::Draw()
 			
 		}
 	}
+
+	//Draw Heart
+	if (HPcounter == 3) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 2) {
+		for (int i = 0; i < 2; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+	}
+	if (HPcounter == 1) {
+		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		for (int i = 1; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 0) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
+	}
+
+	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 
 
 	//Update screen
