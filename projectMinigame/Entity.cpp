@@ -18,7 +18,6 @@ void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, 
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
-	HP = 200;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {

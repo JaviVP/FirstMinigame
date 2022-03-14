@@ -430,37 +430,7 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	rc.x += rc.w;
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
-	//Draw Heart
-	if (HPcounter == 3) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		}
-	}
-	if (HPcounter == 2) {
-		for (int i = 0; i < 2; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		}
-		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-	}
-	if (HPcounter == 1) {
-		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		for (int i = 1; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-		}
-	}
-	if (HPcounter == 0) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-		}
-	}
 	
-	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 	//Draw player
 	Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 	if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
@@ -556,6 +526,38 @@ void Game::Draw()
 			
 		}
 	}
+
+	//Draw Heart
+	if (HPcounter == 3) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 2) {
+		for (int i = 0; i < 2; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		}
+		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+	}
+	if (HPcounter == 1) {
+		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+		for (int i = 1; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
+	}
+	if (HPcounter == 0) {
+		for (int i = 0; i < 3; i++) {
+			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		}
+	}
+
+	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 
 
 	//Update screen
