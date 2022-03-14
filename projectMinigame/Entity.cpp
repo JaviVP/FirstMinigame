@@ -11,15 +11,19 @@ void Entity::Init(int posx, int posy, int w, int h, int s, float posx2, float po
 {
 	x = posx;
 	y = posy;
-	HP = 40;
 	width = w;
 	height = h;
 	speed = s;
 	is_alive = true;
 	x_shot = posx2;
 	y_shot = posy2;
+<<<<<<< HEAD
 	PlayerHP[0] = 1, PlayerHP[1] = 1, PlayerHP[2] = 1;
 
+=======
+	HP = 100;
+	PlayerHP[3];
+>>>>>>> 1f7ab569751278bd38a38ea3f84068c46a11e10d
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
