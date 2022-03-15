@@ -407,7 +407,7 @@ bool Game::Input()
 	SDL_Event event;
 	if (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT || score == 30)	return false;
+		if (event.type == SDL_QUIT || score == 1000)	return false;
 	}
 
 	SDL_PumpEvents();
@@ -437,6 +437,7 @@ bool Game::Update()
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
 	if (keys[SDL_SCANCODE_D] == KEY_REPEAT && Player.GetX() < 920) fx = 1;
+	if (god_mode == true) HPcounter = 100;
 	if (buttons == SDL_BUTTON_LEFT && bullet_delay_c == 0) {
 
 		int x, y, w, h;
@@ -481,7 +482,7 @@ bool Game::Update()
 		idx_shot %= MAX_SHOTS;
 
 		// Play a single Sound
-		if (HPcounter > 0 && score <30) {
+		if (HPcounter > 0 && score <1000) {
 			Mix_PlayChannel(-1, sfxs[0], 0);
 			Mix_Volume(-1, MIX_MAX_VOLUME / 40);
 		}
@@ -569,7 +570,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(10);
+				Enemy[i].EnemyHPloss(100);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 			}
@@ -606,7 +607,7 @@ bool Game::Update()
 
 bool Game::Dead(int _num)
 {
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		if (enemyDead[i] == _num)
 		{
@@ -638,7 +639,7 @@ void Game::Draw()
 	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 	
 	//Draw player
-	if (HPcounter>0 && score < 30) {
+	if (HPcounter>0 && score < 1000) {
 		Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 		if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
 			SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
@@ -677,7 +678,7 @@ void Game::Draw()
 	
 
 	//Draw shots
-	if (HPcounter>0 && score < 30) {
+	if (HPcounter>0 && score < 1000) {
 		for (int i = 0; i < MAX_SHOTS; ++i)
 		{
 			if (Shots[i].IsAlive())
@@ -690,7 +691,7 @@ void Game::Draw()
 	}
 
 	//Draw enemies
-	if (HPcounter > 0 && score < 30) {
+	if (HPcounter > 0 && score < 1000) {
 		for (int i = 0; i < MAX_ENEMIES; ++i)
 		{
 			if (Enemy[i].IsAlive())
@@ -861,7 +862,7 @@ void Game::Draw()
 	}
 
 	//Draw game over
-	if (HPcounter <= 0 || score >=30) {
+	if (HPcounter <= 0 || score >=1000) {
 		rc.x = 300;
 		rc.y = 100;
 		rc.h = 500;
