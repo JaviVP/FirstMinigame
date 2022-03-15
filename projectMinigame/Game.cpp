@@ -6,9 +6,8 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0;
-bool aux = true;
-
+int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0, counter1 = 0;
+bool aux = true, Menu = false;
 
 bool Game::Init()
 {
@@ -51,10 +50,7 @@ bool Game::Init()
 		SDL_Log("Mix_OpenAudio: %s\n", Mix_GetError());
 		return false;
 	}
-	if (!LoadAudios())
-		return false;
-
-
+	if (!LoadAudios()) return false;
 	//Init variables
 	//size: 104x82
 	Player.Init((WINDOW_WIDTH >> 1) - 16, (WINDOW_HEIGHT >> 1) -16, 64, 64, 3,NULL, NULL, NULL, NULL);
@@ -68,6 +64,8 @@ bool Game::Init()
 	Score1.Init(WINDOW_WIDTH-80, WINDOW_HEIGHT-80, 64, 64, 0,NULL, NULL,NULL, NULL);
 	Score2.Init(WINDOW_WIDTH - 150, WINDOW_HEIGHT - 80, 64, 64, 0, NULL, NULL, NULL, NULL);
 	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,NULL, NULL, NULL, NULL);
+	StartBack.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, NULL, NULL, NULL, NULL);
+	Text.Init((WINDOW_WIDTH / 2)-100, (WINDOW_HEIGHT / 2), 200, 64, 0, NULL, NULL, NULL, NULL);
 	god_mode = false;
 	return true;
 }
@@ -140,6 +138,17 @@ bool Game::LoadImages()
 	}
 	img_shot = SDL_CreateTextureFromSurface(Renderer, IMG_Load("shot.png"));
 	if (img_shot == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	//Load
+	img_Black = SDL_CreateTextureFromSurface(Renderer, IMG_Load("PantallaInicio.png"));
+	if (img_Black == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Press = SDL_CreateTextureFromSurface(Renderer, IMG_Load("Start.png"));
+	if (img_Press == NULL) {
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
@@ -387,6 +396,8 @@ void Game::Release()
 	SDL_DestroyTexture(img_EmptyHeart);
 	SDL_DestroyTexture(img_WhiteHeart);
 	SDL_DestroyTexture(img_GreyHeart);
+	SDL_DestroyTexture(img_Black);
+	SDL_DestroyTexture(img_Press);
 	SDL_DestroyTexture(img_One);
 	SDL_DestroyTexture(img_Zero);
 	SDL_DestroyTexture(img_Two);
@@ -643,216 +654,264 @@ void Game::Draw()
 
 	//God mode uses red wireframe rectangles for physical objects
 	if (god_mode) SDL_SetRenderDrawColor(Renderer, 192, 0, 0, 255);
+		//Draw scene
+		Scene.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		SDL_RenderCopy(Renderer, img_background, NULL, &rc);
+		rc.x += rc.w;
+		SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 
-	//Draw scene
-	Scene.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
-	rc.x += rc.w;
-	SDL_RenderCopy(Renderer, img_background, NULL, &rc);
-	
-	//Draw player
-	if (HPcounter>0 && score < 1000) {
-		Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
-			SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) < 0)) {
-			SDL_RenderCopy(Renderer, img_player_S, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) > 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
-			SDL_RenderCopy(Renderer, img_player_W, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) < 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
-			SDL_RenderCopy(Renderer, img_player_E, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) > 0))) {
-			SDL_RenderCopy(Renderer, img_player_NW, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) > 0))) {
-			SDL_RenderCopy(Renderer, img_player_NE, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) < 0))) {
-			SDL_RenderCopy(Renderer, img_player_SW, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-		else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) < 0))) {
-			SDL_RenderCopy(Renderer, img_player_SE, NULL, &rc);
-			if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-		}
-	}
-	
-	
-
-	//Draw shots
-	if (HPcounter>0 && score < 1000) {
-		for (int i = 0; i < MAX_SHOTS; ++i)
-		{
-			if (Shots[i].IsAlive())
-			{
-				Shots[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_shot, NULL, &rc);
+		//Draw player
+		if (HPcounter > 0 && score < 1000) {
+			Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
+				SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) < 0)) {
+				SDL_RenderCopy(Renderer, img_player_S, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) > 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
+				SDL_RenderCopy(Renderer, img_player_W, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) < 0) && (fabs(Player.GetY() - mouseY) <= 50)) {
+				SDL_RenderCopy(Renderer, img_player_E, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) > 0))) {
+				SDL_RenderCopy(Renderer, img_player_NW, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) > 0))) {
+				SDL_RenderCopy(Renderer, img_player_NE, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) > 0) && (((Player.GetY() - mouseY) < 0))) {
+				SDL_RenderCopy(Renderer, img_player_SW, NULL, &rc);
+				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+			}
+			else if (((Player.GetX() - mouseX) < 0) && (((Player.GetY() - mouseY) < 0))) {
+				SDL_RenderCopy(Renderer, img_player_SE, NULL, &rc);
 				if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 			}
 		}
-	}
 
-	//Draw enemies
-	if (HPcounter > 0 && score < 1000) {
-		for (int i = 0; i < MAX_ENEMIES; ++i)
-		{
-			if (Enemy[i].IsAlive())
+
+
+		//Draw shots
+		if (HPcounter > 0 && score < 1000) {
+			for (int i = 0; i < MAX_SHOTS; ++i)
 			{
-				if (Enemy[i].getEnemyType() < 11) {
-					if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_S, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_N, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_W, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_E, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_NW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_NE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_SW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemy_SE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
+				if (Shots[i].IsAlive())
+				{
+					Shots[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_shot, NULL, &rc);
+					if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
 				}
-				if (Enemy[i].getEnemyType() == 11) {
-					if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_S, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_N, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_W, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_E, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_NW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_NE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_SW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_GreenEnemyGroup_SE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-				}
-				else if (Enemy[i].getEnemyType() > 11) {
-
-					if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_S, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_N, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_W, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_E, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_NW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_NE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_SW, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-					else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
-						Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-						SDL_RenderCopy(Renderer, img_BlueEnemy_SE, NULL, &rc);
-						if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-					}
-				}
-
-				
-
 			}
 		}
-	}
-	//Draw Heart
-	if (aux == false) {
-		if (HPcounter == 2) {
-			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
-				for (int i = 0; i < 2; i++) {
-					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-					SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
+
+		//Draw enemies
+		if (HPcounter > 0 && score < 1000) {
+			for (int i = 0; i < MAX_ENEMIES; ++i)
+			{
+				if (Enemy[i].IsAlive())
+				{
+					if (Enemy[i].getEnemyType() < 11) {
+						if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_S, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_N, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_W, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_E, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_NW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_NE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_SW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemy_SE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+					}
+					if (Enemy[i].getEnemyType() == 11) {
+						if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_S, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_N, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_W, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_E, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_NW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_NE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_SW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_GreenEnemyGroup_SE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+					}
+					else if (Enemy[i].getEnemyType() > 11) {
+
+						if (fabs((Enemy[i].GetX() - Player.GetX())) <= 50 && (Enemy[i].GetY() - Player.GetY()) < 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_S, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((fabs(Enemy[i].GetX() - Player.GetX()) <= 50) && (Enemy[i].GetY() - Player.GetY()) > 0) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_N, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) > 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_W, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if ((Enemy[i].GetX() - Player.GetX()) < 0 && fabs((Enemy[i].GetY() - Player.GetY())) <= 50) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_E, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_NW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) > 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_NE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) > 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_SW, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+						else if (((Enemy[i].GetX() - Player.GetX()) < 0) && (((Enemy[i].GetY() - Player.GetY()) < 0))) {
+							Enemy[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+							SDL_RenderCopy(Renderer, img_BlueEnemy_SE, NULL, &rc);
+							if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+						}
+					}
+
+
+
 				}
-				Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
 			}
-			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+		}
+		//Draw Heart
+		if (aux == false) {
+			if (HPcounter == 2) {
+				if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+					for (int i = 0; i < 2; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
+					}
+					Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+				}
+				if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+					for (int i = 0; i < 2; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+					}
+					Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+				}
+			}
+			if (HPcounter == 1) {
+				if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+					Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
+					for (int i = 1; i < 3; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+					}
+				}
+				if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+					Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+					for (int i = 1; i < 3; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+					}
+				}
+			}
+			if (HPcounter == 0) {
+				if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+					for (int i = 0; i < 3; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+					}
+				}
+				if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+					for (int i = 0; i < 3; i++) {
+						Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+						SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+					}
+				}
+			}
+		}
+		if (aux == true) {
+			if (HPcounter == 3) {
+				for (int i = 0; i < 3; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+				}
+			}
+			if (HPcounter == 2) {
 				for (int i = 0; i < 2; i++) {
 					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 					SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
@@ -860,17 +919,7 @@ void Game::Draw()
 				Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
 			}
-		}
-		if (HPcounter == 1) {
-			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
-				Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
-				for (int i = 1; i < 3; i++) {
-					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
-				}
-			}
-			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+			if (HPcounter == 1) {
 				Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
 				for (int i = 1; i < 3; i++) {
@@ -878,144 +927,121 @@ void Game::Draw()
 					SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
 				}
 			}
-		}
-		if (HPcounter == 0) {
-			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+			if (HPcounter == 0) {
 				for (int i = 0; i < 3; i++) {
 					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
-				}
-			}
-			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
-				for (int i = 0; i < 3; i++) {
-					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+					SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
 				}
 			}
 		}
-	}
-	if (aux == true) {
-		if (HPcounter == 3) {
-			for (int i = 0; i < 3; i++) {
-				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-			}
+
+		//Draw game over
+		if (HPcounter <= 0 || score >= 1000) {
+			rc.x = 300;
+			rc.y = 100;
+			rc.h = 500;
+			rc.w = 400;
+			SDL_RenderCopy(Renderer, img_GameOver, NULL, &rc);
 		}
-		if (HPcounter == 2) {
-			for (int i = 0; i < 2; i++) {
-				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-			}
-			Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+
+		//Draw score
+		Score1.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		Score2.GetRect(&rc2.x, &rc2.y, &rc2.w, &rc2.h);
+
+		switch (score)
+		{
+		case 0: case 10: case 20:
+			SDL_RenderCopy(Renderer, img_Zero, NULL, &rc);
+			if (score == 10)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 20)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 1: case 11:case 21:
+			SDL_RenderCopy(Renderer, img_One, NULL, &rc);
+			if (score == 11)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 21)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 2:case 12:case 22:
+			SDL_RenderCopy(Renderer, img_Two, NULL, &rc);
+			if (score == 12)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 22)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 3:case 13:case 23:
+			SDL_RenderCopy(Renderer, img_Three, NULL, &rc);
+			if (score == 13)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 23)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 4:case 14:case 24:
+			SDL_RenderCopy(Renderer, img_Four, NULL, &rc);
+			if (score == 14)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 24)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 5:case 15:case 25:
+			SDL_RenderCopy(Renderer, img_Five, NULL, &rc);
+			if (score == 15)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 25)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 6:case 16:case 26:
+			SDL_RenderCopy(Renderer, img_Six, NULL, &rc);
+			if (score == 16)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 26)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 7:case 17:case 27:
+			SDL_RenderCopy(Renderer, img_Seven, NULL, &rc);
+			if (score == 17)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 27)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 8:case 18:case 28:
+			SDL_RenderCopy(Renderer, img_Eight, NULL, &rc);
+			if (score == 18)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 28)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
+		case 9:case 19:case 29:
+			SDL_RenderCopy(Renderer, img_Nine, NULL, &rc);
+			if (score == 19)
+				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
+			if (score == 29)
+				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			break;
 		}
-		if (HPcounter == 1) {
-			Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-			for (int i = 1; i < 3; i++) {
-				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+
+		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		if (Menu == false) {
+			StartBack.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Black, NULL, &rc);
+			rc.x += rc.w;
+			SDL_RenderCopy(Renderer, img_Black, NULL, &rc);
+			if (counter1 <= 75) {
+				Text.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Press, NULL, &rc);
 			}
-		}
-		if (HPcounter == 0) {
-			for (int i = 0; i < 3; i++) {
-				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+			if (counter1 >= 125) {
+				counter1 = 0;
 			}
+			if (keys[SDL_SCANCODE_SPACE] == KEY_DOWN) Menu = true, toggle_enemies = true;
+			counter1++;
 		}
-	}
 
-	//Draw game over
-	if (HPcounter <= 0 || score >=1000) {
-		rc.x = 300;
-		rc.y = 100;
-		rc.h = 500;
-		rc.w = 400;
-		SDL_RenderCopy(Renderer, img_GameOver, NULL, &rc);
-	}
+		//Update screen
+		SDL_RenderPresent(Renderer);
 
-	//Draw score
-	Score1.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-	Score2.GetRect(&rc2.x, &rc2.y, &rc2.w, &rc2.h);
-
-	switch (score)
-	{
-	case 0: case 10: case 20:
-		SDL_RenderCopy(Renderer, img_Zero, NULL, &rc);
-		if (score == 10)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 20)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 1: case 11:case 21:
-		SDL_RenderCopy(Renderer, img_One, NULL, &rc);
-		if (score == 11)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 21)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 2:case 12:case 22:
-		SDL_RenderCopy(Renderer, img_Two, NULL, &rc);
-		if (score == 12)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 22)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 3:case 13:case 23:
-		SDL_RenderCopy(Renderer, img_Three, NULL, &rc);
-		if (score == 13)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 23)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 4:case 14:case 24:
-		SDL_RenderCopy(Renderer, img_Four, NULL, &rc);
-		if (score == 14)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 24)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 5:case 15:case 25:
-		SDL_RenderCopy(Renderer, img_Five, NULL, &rc);
-		if (score == 15)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 25)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 6:case 16:case 26:
-		SDL_RenderCopy(Renderer, img_Six, NULL, &rc);
-		if (score == 16)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 26)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 7:case 17:case 27:
-		SDL_RenderCopy(Renderer, img_Seven, NULL, &rc);
-		if (score == 17)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 27)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 8:case 18:case 28:
-		SDL_RenderCopy(Renderer, img_Eight, NULL, &rc);
-		if (score == 18)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 28)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	case 9:case 19:case 29:
-		SDL_RenderCopy(Renderer, img_Nine, NULL, &rc);
-		if (score == 19)
-			SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-		if (score == 29)
-			SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
-		break;
-	}
-
-	if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
-
-	//Update screen
-	SDL_RenderPresent(Renderer);
-
-	SDL_Delay(10);	// 1000/10 = 100 fps max
+		SDL_Delay(10);	// 1000/10 = 100 fps max
+	
 }
