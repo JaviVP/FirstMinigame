@@ -67,9 +67,7 @@ bool Game::Init()
 	SDL_QueryTexture(img_background, NULL, NULL, &w, NULL);
 	Score1.Init(WINDOW_WIDTH-80, WINDOW_HEIGHT-80, 64, 64, 0,NULL, NULL,NULL, NULL);
 	Score2.Init(WINDOW_WIDTH - 150, WINDOW_HEIGHT - 80, 64, 64, 0, NULL, NULL, NULL, NULL);
-
-	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 4,NULL, NULL, NULL, NULL);
-
+	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,NULL, NULL, NULL, NULL);
 	god_mode = false;
 	return true;
 }
