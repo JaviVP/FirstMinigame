@@ -6,11 +6,13 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0, counter1 = 0;
+int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0, counter1 = 0, MusicC = 0, SCORE = 0;
+int ScoreAux[200];
 bool aux = true, Menu = false;
 
 bool Game::Init()
 {
+
 	//Initialize SDL with all subsystems
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -67,6 +69,9 @@ bool Game::Init()
 	StartBack.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, NULL, NULL, NULL, NULL);
 	Text.Init((WINDOW_WIDTH / 2)-100, (WINDOW_HEIGHT / 2), 200, 64, 0, NULL, NULL, NULL, NULL);
 	god_mode = false;
+	for (int i = 0; i < 200; i++) {
+		ScoreAux[i] = -1;
+	}
 	return true;
 }
 
@@ -429,7 +434,7 @@ bool Game::Input()
 	SDL_Event event;
 	if (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT || score == 1000)	return false;
+		if (event.type == SDL_QUIT)	return false;
 	}
 
 	SDL_PumpEvents();
@@ -503,9 +508,17 @@ bool Game::Update()
 		idx_shot %= MAX_SHOTS;
 
 		// Play a single Sound
-		if (HPcounter > 0 && score <1000) {
-			Mix_PlayChannel(-1, sfxs[0], 0);
-			Mix_Volume(-1, MIX_MAX_VOLUME / 40);
+		if (HPcounter > 0) {
+			if (MusicC < 1000) {
+				Mix_PlayChannel(1, sfxs[0], 0);
+				Mix_Volume(-1, MIX_MAX_VOLUME / 40);
+			}
+			if (MusicC < 2000 && MusicC > 1000) {
+				Mix_PlayChannel(1, sfxs[0], 0);
+				Mix_Volume(-1, MIX_MAX_VOLUME / 40);
+			}
+			if (MusicC > 2000) MusicC = 0;
+			MusicC++;
 		}
 	}
 	//Bullet Delay
@@ -537,7 +550,7 @@ bool Game::Update()
 			}
 			int enemyType = rand() % 21 + 1; // So that one type of enemy spawns less, we make an enemy type be 3 numbers
 			if (enemyType < 11) {
-				Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 100, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+				Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 
 			}
 			if (enemyType == 11) {
@@ -545,7 +558,7 @@ bool Game::Update()
 
 			}
 			else if (enemyType > 11) {
-				Enemy[idx_Enemy].Init(x, y, 32, 64, 3, 50, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+				Enemy[idx_Enemy].Init(x, y, 32, 64, 3, 60, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 
 			}
 			idx_Enemy++;
@@ -591,7 +604,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(10);
+				Enemy[i].EnemyHPloss(250);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 			}
@@ -599,8 +612,16 @@ bool Game::Update()
 		if (Enemy[i].GetEnemyHP() <= 0) {
 			Enemy[i].ShutDown();
 			Enemy[i].ResetEnemyPos();
-			if (Dead(i))
-				score++;
+			for (int k = 0; k < 200; k++) {
+				if (ScoreAux[k] == -1) {
+					ScoreAux[k] = i;
+					SCORE++;
+					break;
+				}
+				if (ScoreAux[k] == i) {
+					break;
+				}
+			}
 		}
 	}
 	//Player kill
@@ -628,20 +649,6 @@ bool Game::Update()
 	return false;
 }
 
-bool Game::Dead(int _num)
-{
-	for (int i = 0; i < 1000; i++)
-	{
-		if (enemyDead[i] == _num)
-		{
-			return false;
-		}
-	}
-	enemyDead[scoreDead] = _num;
-	scoreDead++;
-	return true;
-}
-
 void Game::Draw()
 {
 	SDL_Rect rc;
@@ -661,7 +668,7 @@ void Game::Draw()
 		SDL_RenderCopy(Renderer, img_background, NULL, &rc);
 
 		//Draw player
-		if (HPcounter > 0 && score < 1000) {
+		if (HPcounter > 0) {
 			Player.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 			if ((fabs(Player.GetX() - mouseX) <= 50) && ((Player.GetY() - mouseY) > 0)) {
 				SDL_RenderCopy(Renderer, img_player_N, NULL, &rc);
@@ -700,7 +707,7 @@ void Game::Draw()
 
 
 		//Draw shots
-		if (HPcounter > 0 && score < 1000) {
+		if (HPcounter > 0) {
 			for (int i = 0; i < MAX_SHOTS; ++i)
 			{
 				if (Shots[i].IsAlive())
@@ -713,7 +720,7 @@ void Game::Draw()
 		}
 
 		//Draw enemies
-		if (HPcounter > 0 && score < 1000) {
+		if (HPcounter > 0) {
 			for (int i = 0; i < MAX_ENEMIES; ++i)
 			{
 				if (Enemy[i].IsAlive())
@@ -948,81 +955,121 @@ void Game::Draw()
 		Score1.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 		Score2.GetRect(&rc2.x, &rc2.y, &rc2.w, &rc2.h);
 
-		switch (score)
+		switch (SCORE)
 		{
-		case 0: case 10: case 20:
+		case 0: case 10: case 20: case 30: case 40:
 			SDL_RenderCopy(Renderer, img_Zero, NULL, &rc);
-			if (score == 10)
+			if (SCORE == 10)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 20)
+			if (SCORE == 20)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 30)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 40)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 1: case 11:case 21:
+		case 1: case 11:case 21: case 31: case 41:
 			SDL_RenderCopy(Renderer, img_One, NULL, &rc);
-			if (score == 11)
+			if (SCORE == 11)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 21)
+			if (SCORE == 21)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 31)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 41)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 2:case 12:case 22:
+		case 2: case 12: case 22: case 32: case 42:
 			SDL_RenderCopy(Renderer, img_Two, NULL, &rc);
-			if (score == 12)
+			if (SCORE == 12)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 22)
+			if (SCORE == 22)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 32)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 42)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 3:case 13:case 23:
+		case 3: case 13 :case 23: case 33: case 43:
 			SDL_RenderCopy(Renderer, img_Three, NULL, &rc);
-			if (score == 13)
+			if (SCORE == 13)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 23)
+			if (SCORE == 23)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 33)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 43)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 4:case 14:case 24:
+		case 4: case 14: case 24: case 34: case 44:
 			SDL_RenderCopy(Renderer, img_Four, NULL, &rc);
-			if (score == 14)
+			if (SCORE == 14)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 24)
+			if (SCORE == 24)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 34)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 44)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 5:case 15:case 25:
+		case 5: case 15: case 25: case 35: case 45:
 			SDL_RenderCopy(Renderer, img_Five, NULL, &rc);
-			if (score == 15)
+			if (SCORE == 15)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 25)
+			if (SCORE == 25)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 35)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 45)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 6:case 16:case 26:
+		case 6: case 16: case 26: case 36: case 46:
 			SDL_RenderCopy(Renderer, img_Six, NULL, &rc);
-			if (score == 16)
+			if (SCORE == 16)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 26)
+			if (SCORE == 26)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 36)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 46)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 7:case 17:case 27:
+		case 7: case 17: case 27: case 37: case 47:
 			SDL_RenderCopy(Renderer, img_Seven, NULL, &rc);
-			if (score == 17)
+			if (SCORE == 17)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 27)
+			if (SCORE == 27)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 37)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 47)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 8:case 18:case 28:
+		case 8: case 18: case 28: case 38: case 48:
 			SDL_RenderCopy(Renderer, img_Eight, NULL, &rc);
-			if (score == 18)
+			if (SCORE == 18)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 28)
+			if (SCORE == 28)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 38)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 48)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
-		case 9:case 19:case 29:
+		case 9: case 19: case 29: case 39: case 49:
 			SDL_RenderCopy(Renderer, img_Nine, NULL, &rc);
-			if (score == 19)
+			if (SCORE == 19)
 				SDL_RenderCopy(Renderer, img_One, NULL, &rc2);
-			if (score == 29)
+			if (SCORE == 29)
 				SDL_RenderCopy(Renderer, img_Two, NULL, &rc2);
+			if (SCORE == 39)
+				SDL_RenderCopy(Renderer, img_Three, NULL, &rc2);
+			if (SCORE == 49)
+				SDL_RenderCopy(Renderer, img_Four, NULL, &rc2);
 			break;
 		}
-
 		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		//Menu
 		if (Menu == false) {
 			StartBack.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 			SDL_RenderCopy(Renderer, img_Black, NULL, &rc);

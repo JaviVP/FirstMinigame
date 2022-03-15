@@ -16,7 +16,7 @@
 #define MAX_KEYS		256
 #define MAX_SHOTS		128
 #define MAX_ENEMIES		257 //This number must be one higher of the desired enemies
-#define BULLET_DELAY	10
+#define BULLET_DELAY	30
 #define ENEMY_DELAY 	120
 #define MAX_TRACKS		10
 #define MAX_HEARTS		3
@@ -32,7 +32,6 @@ public:
 	bool LoadAudios();
 	bool LoadImages();
 	void Release();
-	bool Dead(int _num);
 	bool Input();
 	bool Update();
 	void Draw();
