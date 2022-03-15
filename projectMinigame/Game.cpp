@@ -17,7 +17,7 @@ bool Game::Init()
 		return false;
 	}
 	//Create our window: title, x, y, w, h, flags
-	Window = SDL_CreateWindow("2d Shotter: wasd + left_click, f1: Show Hitboxes, F2: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	Window = SDL_CreateWindow("2D Shotter: wasd + left_click, F1: God Mode + Hitboxes, F2: Disable God Mode and Hitboxes, F3: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 	if (Window == NULL)
 	{
 		SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -431,8 +431,16 @@ bool Game::Update()
 	//Process Input
 	float fx = 0, fy = 0;
 	if (keys[SDL_SCANCODE_ESCAPE] == KEY_DOWN)	return true;
-	if (keys[SDL_SCANCODE_F1] == KEY_DOWN)		god_mode = !god_mode;
-	if (keys[SDL_SCANCODE_F2] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
+	if (keys[SDL_SCANCODE_F1] == KEY_DOWN && god_mode == false) {
+		HPcounter = 1000;
+		god_mode = !god_mode;
+	}
+	if (keys[SDL_SCANCODE_F2] == KEY_DOWN && god_mode == true) {
+		HPcounter = 3;
+		god_mode = !god_mode;
+	}
+
+	if (keys[SDL_SCANCODE_F3] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
 	if (keys[SDL_SCANCODE_W] == KEY_REPEAT && Player.GetY() > 0) fy = -1;
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
@@ -570,7 +578,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(100);
+				Enemy[i].EnemyHPloss(10);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 			}
