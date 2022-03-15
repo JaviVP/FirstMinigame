@@ -40,7 +40,7 @@ public:
 private:
 	SDL_Window *Window;
 	SDL_Renderer *Renderer;
-	SDL_Texture* img_background, * img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, * img_shot, * img_Heart, * img_EmptyHeart,
+	SDL_Texture* img_background, * img_player_N, * img_player_NE, * img_player_NW, * img_player_W, * img_player_SW, * img_player_S, * img_player_SE, * img_player_E, * img_shot, * img_Heart, * img_EmptyHeart, * img_WhiteHeart, * img_GreyHeart,
 		* img_GreenEnemy_N, * img_GreenEnemy_S, * img_GreenEnemy_E, * img_GreenEnemy_W, * img_GreenEnemy_NW, * img_GreenEnemy_NE, * img_GreenEnemy_SW, * img_GreenEnemy_SE,
 		* img_GreenEnemyGroup_N, * img_GreenEnemyGroup_S, * img_GreenEnemyGroup_E, * img_GreenEnemyGroup_W, * img_GreenEnemyGroup_NW, * img_GreenEnemyGroup_NE, * img_GreenEnemyGroup_SW, * img_GreenEnemyGroup_SE,
 		* img_BlueEnemy_N, * img_BlueEnemy_S, * img_BlueEnemy_E, * img_BlueEnemy_W, * img_BlueEnemy_NW, * img_BlueEnemy_NE, * img_BlueEnemy_SW, * img_BlueEnemy_SE,

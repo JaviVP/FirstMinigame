@@ -9,6 +9,7 @@ Game::~Game(){}
 int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0;
 bool aux = true;
 
+
 bool Game::Init()
 {
 	//Initialize SDL with all subsystems
@@ -17,7 +18,7 @@ bool Game::Init()
 		return false;
 	}
 	//Create our window: title, x, y, w, h, flags
-	Window = SDL_CreateWindow("2D Shotter: wasd + left_click, F1: God Mode + Hitboxes, F2: Disable God Mode and Hitboxes, F3: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	Window = SDL_CreateWindow("2D Shotter: wasd + left_click, F1: God Mode + Hitboxes, F2: Toggle enemies", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 	if (Window == NULL)
 	{
 		SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -58,8 +59,8 @@ bool Game::Init()
 	//size: 104x82
 	Player.Init((WINDOW_WIDTH >> 1) - 16, (WINDOW_HEIGHT >> 1) -16, 64, 64, 3,NULL, NULL, NULL, NULL);
 	for (int i = 0; i < 3; i++) {
-		Heart[i].Init(0 + counter, 700, 64, 64, 3, NULL, NULL, NULL, NULL);
-		counter += 66;
+		Heart[i].Init(2 + counter, 700, 64, 64, 3, NULL, NULL, NULL, NULL);
+		counter += 68;
 	}
 	idx_shot = 0;
 	int w;
@@ -152,6 +153,16 @@ bool Game::LoadImages()
 	}
 	img_EmptyHeart = SDL_CreateTextureFromSurface(Renderer, IMG_Load("SpriteHeartVacio.png"));
 	if (img_EmptyHeart == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_WhiteHeart = SDL_CreateTextureFromSurface(Renderer, IMG_Load("WhiteHeart.png"));
+	if (img_WhiteHeart == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_GreyHeart = SDL_CreateTextureFromSurface(Renderer, IMG_Load("GreyHeart.png"));
+	if (img_GreyHeart == NULL) {
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
@@ -376,6 +387,8 @@ void Game::Release()
 	SDL_DestroyTexture(img_BlueEnemy_SW);
 	SDL_DestroyTexture(img_Heart);
 	SDL_DestroyTexture(img_EmptyHeart);
+	SDL_DestroyTexture(img_WhiteHeart);
+	SDL_DestroyTexture(img_GreyHeart);
 	SDL_DestroyTexture(img_One);
 	SDL_DestroyTexture(img_Zero);
 	SDL_DestroyTexture(img_Two);
@@ -431,21 +444,12 @@ bool Game::Update()
 	//Process Input
 	float fx = 0, fy = 0;
 	if (keys[SDL_SCANCODE_ESCAPE] == KEY_DOWN)	return true;
-	if (keys[SDL_SCANCODE_F1] == KEY_DOWN && god_mode == false) {
-		HPcounter = 1000;
-		god_mode = !god_mode;
-	}
-	if (keys[SDL_SCANCODE_F2] == KEY_DOWN && god_mode == true) {
-		HPcounter = 3;
-		god_mode = !god_mode;
-	}
-
-	if (keys[SDL_SCANCODE_F3] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
+	if (keys[SDL_SCANCODE_F1] == KEY_DOWN) god_mode = !god_mode;
+	if (keys[SDL_SCANCODE_F2] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
 	if (keys[SDL_SCANCODE_W] == KEY_REPEAT && Player.GetY() > 0) fy = -1;
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
 	if (keys[SDL_SCANCODE_D] == KEY_REPEAT && Player.GetX() < 920) fx = 1;
-	if (god_mode == true) HPcounter = 100;
 	if (buttons == SDL_BUTTON_LEFT && bullet_delay_c == 0) {
 
 		int x, y, w, h;
@@ -591,15 +595,17 @@ bool Game::Update()
 		}
 	}
 	//Player kill
-	for (int i = 0; i < idx_Enemy; i++) {
-		int enemy_x, enemy_y, enemy_w, enemy_h;
-		Enemy[i].GetRect(&enemy_x, &enemy_y, &enemy_w, &enemy_h);
-		int player_x, player_y, player_w, player_h;
-		Player.GetRect(&player_x, &player_y, &player_w, &player_h);
-		if (((player_x >= enemy_x && player_x <= enemy_w + enemy_x) || (player_w + player_x >= enemy_x && player_w + player_x <= enemy_w + enemy_x)) && ((player_y >= enemy_y && player_y <= enemy_h + enemy_y) || (player_h + player_y >= enemy_y && player_h + player_y <= enemy_h + enemy_y))) {
-			if (aux == true) {
-				HPcounter--;
-				aux = false;
+	if (god_mode == false) {
+		for (int i = 0; i < idx_Enemy; i++) {
+			int enemy_x, enemy_y, enemy_w, enemy_h;
+			Enemy[i].GetRect(&enemy_x, &enemy_y, &enemy_w, &enemy_h);
+			int player_x, player_y, player_w, player_h;
+			Player.GetRect(&player_x, &player_y, &player_w, &player_h);
+			if (((player_x >= enemy_x && player_x <= enemy_w + enemy_x) || (player_w + player_x >= enemy_x && player_w + player_x <= enemy_w + enemy_x)) && ((player_y >= enemy_y && player_y <= enemy_h + enemy_y) || (player_h + player_y >= enemy_y && player_h + player_y <= enemy_h + enemy_y))) {
+				if (aux == true) {
+					HPcounter--;
+					aux = false;
+				}
 			}
 		}
 	}
@@ -837,35 +843,87 @@ void Game::Draw()
 			}
 		}
 	}
-	
-
 	//Draw Heart
-	if (HPcounter == 3) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+	if (aux == false) {
+		if (HPcounter == 2) {
+			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+				for (int i = 0; i < 2; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
+				}
+				Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+			}
+			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+				for (int i = 0; i < 2; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+				}
+				Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+			}
+		}
+		if (HPcounter == 1) {
+			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+				Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_WhiteHeart, NULL, &rc);
+				for (int i = 1; i < 3; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+				}
+			}
+			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+				Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+				for (int i = 1; i < 3; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+				}
+			}
+		}
+		if (HPcounter == 0) {
+			if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
+				for (int i = 0; i < 3; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+				}
+			}
+			if ((auxC > 25) && (auxC <= 50) || (auxC > 75) && (auxC <= 100) || (auxC > 125) && (auxC <= 150) || auxC > 175) {
+				for (int i = 0; i < 3; i++) {
+					Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+					SDL_RenderCopy(Renderer, img_GreyHeart, NULL, &rc);
+				}
+			}
 		}
 	}
-	if (HPcounter == 2) {
-		for (int i = 0; i < 2; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+	if (aux == true) {
+		if (HPcounter == 3) {
+			for (int i = 0; i < 3; i++) {
+				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+			}
 		}
-		Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
-	}
-	if (HPcounter == 1) {
-		Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-		SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
-		for (int i = 1; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+		if (HPcounter == 2) {
+			for (int i = 0; i < 2; i++) {
+				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+			}
+			Heart[2].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
 		}
-	}
-	if (HPcounter == 0) {
-		for (int i = 0; i < 3; i++) {
-			Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
-			SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+		if (HPcounter == 1) {
+			Heart[0].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+			SDL_RenderCopy(Renderer, img_Heart, NULL, &rc);
+			for (int i = 1; i < 3; i++) {
+				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+			}
+		}
+		if (HPcounter == 0) {
+			for (int i = 0; i < 3; i++) {
+				Heart[i].GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_EmptyHeart, NULL, &rc);
+			}
 		}
 	}
 

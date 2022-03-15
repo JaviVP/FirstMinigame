@@ -81,3 +81,8 @@ int Entity::getEnemyType()
 {
 	return enemyType;
 }
+void Entity::ModifyParameters(int w, int h)
+{
+	width = w;
+	height = h;
+}

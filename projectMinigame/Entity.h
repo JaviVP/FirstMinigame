@@ -20,6 +20,7 @@ public:
 	void EnemyHPloss(int dmg);
 	void ResetEnemyPos();
 	int getEnemyType();
+	void ModifyParameters(int w, int h);
 
 private:
 	float x, y;
