@@ -74,8 +74,8 @@ void Entity::EnemyHPloss(int dmg)
 }
 void Entity::ResetEnemyPos()
 {
-	x = -100;
-	y = -100;
+	x = -1000;
+	y = -1000;
 }
 int Entity::getEnemyType()
 {
