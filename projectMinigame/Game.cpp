@@ -6,13 +6,12 @@
 
 Game::Game() {}
 Game::~Game(){}
-int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0, counter1 = 0, MusicC = 0, SCORE = 0;
+int Enemy_delay = 0, counter = 0, HPcounter = 3, auxC = 0, counter1 = 0, MusicC = 0, SCORE = 0, STAGE = 0, StageC = 0, ENEMY_DELAY = 400, EnemyCounter = 0;
 int ScoreAux[200];
-bool aux = true, Menu = false;
+bool aux = true, Menu = false, X = false;
 
 bool Game::Init()
 {
-
 	//Initialize SDL with all subsystems
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -68,6 +67,7 @@ bool Game::Init()
 	Scene.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,NULL, NULL, NULL, NULL);
 	StartBack.Init(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, NULL, NULL, NULL, NULL);
 	Text.Init((WINDOW_WIDTH / 2)-100, (WINDOW_HEIGHT / 2), 200, 64, 0, NULL, NULL, NULL, NULL);
+	Stage.Init((WINDOW_WIDTH / 2) - 100, WINDOW_HEIGHT - 60, 200, 64, 0, NULL, NULL, NULL, NULL);
 	god_mode = false;
 	for (int i = 0; i < 200; i++) {
 		ScoreAux[i] = -1;
@@ -358,6 +358,32 @@ bool Game::LoadImages()
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
+	//Stages
+	img_Stage1 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE1.png"));
+	if (img_Stage1 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Stage2 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE2.png"));
+	if (img_Stage2 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Stage3 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE3.png"));
+	if (img_Stage3 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Stage4 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE4.png"));
+	if (img_Stage4 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
+	img_Stage5 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE5.png"));
+	if (img_Stage5 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
 	return true;
 }
 void Game::Release()
@@ -413,6 +439,11 @@ void Game::Release()
 	SDL_DestroyTexture(img_Seven);
 	SDL_DestroyTexture(img_Six);
 	SDL_DestroyTexture(img_Five);
+	SDL_DestroyTexture(img_Stage1);
+	SDL_DestroyTexture(img_Stage2);
+	SDL_DestroyTexture(img_Stage3);
+	SDL_DestroyTexture(img_Stage4);
+	SDL_DestroyTexture(img_Stage5);
 	IMG_Quit();
 	
 	// Free Audios
@@ -548,8 +579,27 @@ bool Game::Update()
 				y = WINDOW_HEIGHT;
 				x = val3;
 			}
-			int enemyType = rand() % 21 + 1; // So that one type of enemy spawns less, we make an enemy type be 3 numbers
-			if (enemyType < 11) {
+			int enemyType = rand() % 21 + 1; // So that one type of enemy spawns less, we make an enemy type be multiple numbers
+			//Stages
+			if (STAGE == 1 && EnemyCounter <= 9) {
+				enemyType = 1;
+				if (enemyType < 11) {
+					Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+					EnemyCounter++;
+				}
+			}
+			if (STAGE == 2 && EnemyCounter >= 10 && EnemyCounter <= 29 && X == true) {
+				if (enemyType = 11) enemyType = 1;
+				if (enemyType < 11) {
+					Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+					EnemyCounter++;
+				}
+				else if (enemyType > 11) {
+					Enemy[idx_Enemy].Init(x, y, 32, 64, 3, 60, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+
+				}
+			}
+			/*if (enemyType < 11) {
 				Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 
 			}
@@ -560,9 +610,20 @@ bool Game::Update()
 			else if (enemyType > 11) {
 				Enemy[idx_Enemy].Init(x, y, 32, 64, 3, 60, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 
-			}
+			}*/
 			idx_Enemy++;
 			idx_Enemy %= MAX_ENEMIES;
+	}
+	// Stage Max Enemies
+	if (EnemyCounter == 10) {
+		STAGE = 2;
+		Enemy_delay = 1;
+		ENEMY_DELAY = 600;
+	}
+	if (ENEMY_DELAY == 600 && Enemy_delay == ENEMY_DELAY && X == false) {
+		ENEMY_DELAY = 380;
+		Enemy_delay = 0;
+		X = true;
 	}
 	//Enemy Delay
 	if (Enemy_delay < ENEMY_DELAY) {
@@ -604,7 +665,7 @@ bool Game::Update()
 			int bullet_x, bullet_y, bullet_w, bullet_h;
 			Shots[j].GetRect(&bullet_x, &bullet_y, &bullet_w, &bullet_h);
 			if (((bullet_x >= enemy_x && bullet_x <= enemy_w + enemy_x) || (bullet_w + bullet_x >= enemy_x && bullet_w + bullet_x <= enemy_w + enemy_x)) && ((bullet_y >= enemy_y && bullet_y <= enemy_h + enemy_y ) || (bullet_h + bullet_y>= enemy_y && bullet_h + bullet_y <= enemy_h + enemy_y)))  {
-				Enemy[i].EnemyHPloss(25);
+				Enemy[i].EnemyHPloss(12);
 				Shots[j].ShutDown();
 				Shots[j].ResetEnemyPos();
 			}
@@ -858,7 +919,7 @@ void Game::Draw()
 				}
 			}
 		}
-		//Draw Heart
+		//Draw Hearts
 		if (aux == false) {
 			if (HPcounter == 2) {
 				if (auxC <= 25 || (auxC > 50) && (auxC <= 75) || (auxC > 100) && (auxC <= 125) || (auxC > 150) && (auxC <= 175)) {
@@ -954,7 +1015,6 @@ void Game::Draw()
 		//Draw score
 		Score1.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 		Score2.GetRect(&rc2.x, &rc2.y, &rc2.w, &rc2.h);
-
 		switch (SCORE)
 		{
 		case 0: case 10: case 20: case 30: case 40:
@@ -1069,6 +1129,29 @@ void Game::Draw()
 			break;
 		}
 		if (god_mode) SDL_RenderDrawRect(Renderer, &rc);
+		//Draw Stage
+		if (STAGE != 0) {
+			if (STAGE == 1) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage1, NULL, &rc);
+			}
+			if (STAGE == 2) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage2, NULL, &rc);
+			}
+			if (STAGE == 3) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage3, NULL, &rc);
+			}
+			if (STAGE == 4) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage4, NULL, &rc);
+			}
+			if (STAGE == 5) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage5, NULL, &rc);
+			}
+		}
 		//Menu
 		if (Menu == false) {
 			StartBack.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
@@ -1082,7 +1165,11 @@ void Game::Draw()
 			if (counter1 >= 125) {
 				counter1 = 0;
 			}
-			if (keys[SDL_SCANCODE_SPACE] == KEY_DOWN) Menu = true, toggle_enemies = true;
+			if (keys[SDL_SCANCODE_SPACE] == KEY_DOWN) {
+				Menu = true;
+				toggle_enemies = true;
+				STAGE = 1;
+			}
 			counter1++;
 		}
 
