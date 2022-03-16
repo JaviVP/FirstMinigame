@@ -588,15 +588,15 @@ bool Game::Update()
 					EnemyCounter++;
 				}
 			}
-			if (STAGE == 2 && EnemyCounter >= 10 && EnemyCounter <= 29 && X == true) {
-				if (enemyType = 11) enemyType = 1;
+			if (STAGE == 2 && EnemyCounter >= 10 && EnemyCounter <= 29) {
+				if (enemyType == 11) enemyType = 1;
 				if (enemyType < 11) {
 					Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 					EnemyCounter++;
 				}
 				else if (enemyType > 11) {
 					Enemy[idx_Enemy].Init(x, y, 32, 64, 3, 60, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
-
+					EnemyCounter++;
 				}
 			}
 			/*if (enemyType < 11) {
@@ -615,15 +615,15 @@ bool Game::Update()
 			idx_Enemy %= MAX_ENEMIES;
 	}
 	// Stage Max Enemies
-	if (EnemyCounter == 10) {
+	if (EnemyCounter == 10 && X == false) {
 		STAGE = 2;
-		Enemy_delay = 1;
+		Enemy_delay = 0;
 		ENEMY_DELAY = 600;
+		X = true;
 	}
-	if (ENEMY_DELAY == 600 && Enemy_delay == ENEMY_DELAY && X == false) {
+	if (ENEMY_DELAY == 600 && Enemy_delay >= ENEMY_DELAY) {
 		ENEMY_DELAY = 380;
 		Enemy_delay = 0;
-		X = true;
 	}
 	//Enemy Delay
 	if (Enemy_delay < ENEMY_DELAY) {
