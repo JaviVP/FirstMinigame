@@ -618,11 +618,11 @@ bool Game::Update()
 	if (EnemyCounter == 10 && X == false) {
 		STAGE = 2;
 		Enemy_delay = 0;
-		ENEMY_DELAY = 600;
+		ENEMY_DELAY = 300;
 		X = true;
 	}
-	if (ENEMY_DELAY == 600 && Enemy_delay >= ENEMY_DELAY) {
-		ENEMY_DELAY = 380;
+	if (ENEMY_DELAY == 300 && Enemy_delay >= ENEMY_DELAY) {
+		ENEMY_DELAY = 350;
 		Enemy_delay = 0;
 	}
 	//Enemy Delay
