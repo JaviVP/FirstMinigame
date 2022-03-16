@@ -615,7 +615,7 @@ bool Game::Update()
 			idx_Enemy %= MAX_ENEMIES;
 	}
 	// Stage Max Enemies
-	if (EnemyCounter == 10 && X == false) {
+	if (SCORE == 10 && X == false) {
 		STAGE = 2;
 		Enemy_delay = 0;
 		ENEMY_DELAY = 300;
