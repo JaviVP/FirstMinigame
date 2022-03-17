@@ -18,7 +18,7 @@ bool Game::Init()
 		return false;
 	}
 	//Create our window: title, x, y, w, h, flags
-	Window = SDL_CreateWindow("2D Shotter: wasd + left_click, F1: God Mode + Hitboxes, F2: Toggle enemies, F3: Toggle Oneshot, F4: Disabble Oneshot", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	Window = SDL_CreateWindow("2D Shotter: wasd + left_click, F1: God Mode + Hitboxes, F2: Toggle enemies, F3: Toggle Oneshot, F4: Disabble Oneshot, F5: Press once in case enemies havent respawned in atleast 30 seconds", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 	if (Window == NULL)
 	{
 		SDL_Log("Unable to create window: %s", SDL_GetError());
@@ -548,6 +548,7 @@ bool Game::Update()
 	if (keys[SDL_SCANCODE_F2] == KEY_DOWN)		toggle_enemies = !toggle_enemies;
 	if (keys[SDL_SCANCODE_F3] == KEY_DOWN) DMG = 1000;
 	if (keys[SDL_SCANCODE_F4] == KEY_DOWN) DMG = 12;
+	if (keys[SDL_SCANCODE_F5] == KEY_DOWN) EnemyCounter++;
 	if (keys[SDL_SCANCODE_W] == KEY_REPEAT && Player.GetY() > 0) fy = -1;
 	if (keys[SDL_SCANCODE_S] == KEY_REPEAT && Player.GetY() < 685) fy = 1;
 	if (keys[SDL_SCANCODE_A] == KEY_REPEAT && Player.GetX() > 0) fx = -1;
@@ -694,14 +695,14 @@ bool Game::Update()
 				}
 			}
 			if (STAGE == 6 && EnemyCounter >= 90 && EnemyCounter <= 104) {
-				if (enemyType >= 14) enemyType = 12;
-				if (enemyType < 14) enemyType = 1;
-				if (enemyType < 14) {
+				if (enemyType >= 12) enemyType = 12;
+				if (enemyType < 12) enemyType = 1;
+				if (enemyType < 12) {
 					Enemy[idx_Enemy].Init(x, y, 32, 64, 1, 110, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 					EnemyCounter++;
 				}
 				else if (enemyType == 12) {
-					Enemy[idx_Enemy].Init(x, y, 36, 69, 2, 400, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
+					Enemy[idx_Enemy].Init(x, y, 40, 72, 2, 400, (Player.GetX() - x) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), (Player.GetY() - y) / sqrt(pow(Player.GetY() - y, 2) + pow(Player.GetX() - x, 2)), enemyType);
 					EnemyCounter++;
 				}
 			}
@@ -760,7 +761,7 @@ bool Game::Update()
 		X = true;
 	}
 	if (ENEMY_DELAY == 304 && Enemy_delay >= ENEMY_DELAY) {
-		ENEMY_DELAY = 400;
+		ENEMY_DELAY = 500;
 		Enemy_delay = 0;
 	}
 	//Enemy Delay
@@ -812,9 +813,10 @@ bool Game::Update()
 			Enemy[i].ShutDown();
 			Enemy[i].ResetEnemyPos();
 			for (int k = 0; k < 200; k++) {
-				if (ScoreAux[k] == -1 && ScoreAux[k] != i) {
+				if (ScoreAux[k] == -1 && ScoreAux[k] != i && Enemy[i].IsDead() == false) {
 					ScoreAux[k] = i;
 					SCORE++;
+					Enemy[i].Dead();
 					break;
 				}
 				if (ScoreAux[k] == i) {

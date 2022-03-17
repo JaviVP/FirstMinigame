@@ -19,6 +19,7 @@ void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, 
 	x_shot = posx2;
 	y_shot = posy2;
 	enemyType = et;
+	dead = false;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
@@ -58,6 +59,14 @@ void Entity::ShutDown()
 bool Entity::IsAlive()
 {
 	return is_alive;
+}
+bool Entity::IsDead()
+{
+	return dead;
+}
+void Entity::Dead()
+{
+	dead = true;
 }
 void Entity::Move(float dx, float dy)
 {
