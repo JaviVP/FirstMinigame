@@ -425,6 +425,11 @@ bool Game::LoadImages()
 		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
 		return false;
 	}
+	img_Stage6 = SDL_CreateTextureFromSurface(Renderer, IMG_Load("STAGE6.png"));
+	if (img_Stage6 == NULL) {
+		SDL_Log("CreateTextureFromSurface failed: %s\n", SDL_GetError());
+		return false;
+	}
 	return true;
 }
 void Game::Release()
@@ -493,6 +498,7 @@ void Game::Release()
 	SDL_DestroyTexture(img_Stage3);
 	SDL_DestroyTexture(img_Stage4);
 	SDL_DestroyTexture(img_Stage5);
+	SDL_DestroyTexture(img_Stage6);
 	IMG_Quit();
 	
 	// Free Audios
@@ -1423,6 +1429,10 @@ void Game::Draw()
 			if (STAGE == 5) {
 				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
 				SDL_RenderCopy(Renderer, img_Stage5, NULL, &rc);
+			}
+			if (STAGE == 6) {
+				Stage.GetRect(&rc.x, &rc.y, &rc.w, &rc.h);
+				SDL_RenderCopy(Renderer, img_Stage6, NULL, &rc);
 			}
 		}
 		//Menu
