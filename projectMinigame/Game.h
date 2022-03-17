@@ -44,7 +44,7 @@ private:
 		* img_BlueEnemy_N, * img_BlueEnemy_S, * img_BlueEnemy_E, * img_BlueEnemy_W, * img_BlueEnemy_NW, * img_BlueEnemy_NE, * img_BlueEnemy_SW, * img_BlueEnemy_SE,
 		* img_RedEnemy_N, * img_RedEnemy_S, * img_RedEnemy_E, * img_RedEnemy_W, * img_RedEnemy_NW, * img_RedEnemy_NE, * img_RedEnemy_SW, * img_RedEnemy_SE,
 		* img_GameOver, * img_One, * img_Zero, * img_Two, * img_Three, * img_Five, * img_Four, * img_Six, * img_Seven, * img_Eight, * img_Nine,
-		* img_Stage1, * img_Stage2, * img_Stage3, * img_Stage4, * img_Stage5;
+		* img_Stage1, * img_Stage2, * img_Stage3, * img_Stage4, * img_Stage5, *img_Stage6;
 
 	Uint32 buttons; 
 
