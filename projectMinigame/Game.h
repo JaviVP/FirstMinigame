@@ -42,6 +42,7 @@ private:
 		* img_GreenEnemy_N, * img_GreenEnemy_S, * img_GreenEnemy_E, * img_GreenEnemy_W, * img_GreenEnemy_NW, * img_GreenEnemy_NE, * img_GreenEnemy_SW, * img_GreenEnemy_SE,
 		* img_GreenEnemyGroup_N, * img_GreenEnemyGroup_S, * img_GreenEnemyGroup_E, * img_GreenEnemyGroup_W, * img_GreenEnemyGroup_NW, * img_GreenEnemyGroup_NE, * img_GreenEnemyGroup_SW, * img_GreenEnemyGroup_SE,
 		* img_BlueEnemy_N, * img_BlueEnemy_S, * img_BlueEnemy_E, * img_BlueEnemy_W, * img_BlueEnemy_NW, * img_BlueEnemy_NE, * img_BlueEnemy_SW, * img_BlueEnemy_SE,
+		* img_RedEnemy_N, * img_RedEnemy_S, * img_RedEnemy_E, * img_RedEnemy_W, * img_RedEnemy_NW, * img_RedEnemy_NE, * img_RedEnemy_SW, * img_RedEnemy_SE,
 		* img_GameOver, * img_One, * img_Zero, * img_Two, * img_Three, * img_Five, * img_Four, * img_Six, * img_Seven, * img_Eight, * img_Nine,
 		* img_Stage1, * img_Stage2, * img_Stage3, * img_Stage4, * img_Stage5;
 
