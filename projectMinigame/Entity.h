@@ -13,7 +13,7 @@ public:
 	float  GetShotX();
 	float  GetShotY();
 	int  GetWidth();
-	void ShutDown(); 
+	void ShutDown();
 	bool IsAlive();
 	bool IsDead();
 	void Move(float dx, float dy);
@@ -23,13 +23,15 @@ public:
 	void ResetEnemyPos();
 	int getEnemyType();
 	void ModifyParameters(int w, int h);
+	bool HasCollided();
+	void ChangeCollision();
 
 private:
 	float x, y;
 	int width, height;
 	int speed;
 	int hitPoints;
-	bool is_alive, dead = false;
+	bool is_alive, dead = false, Collision;
 	int enemyType; // 1-Green, 2-Blue
 	float x_shot, y_shot; //Position for bullets to travel to (should be given as (y2-y1) / (x2-x1))
 };

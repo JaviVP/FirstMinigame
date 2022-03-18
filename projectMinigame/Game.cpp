@@ -788,13 +788,32 @@ bool Game::Update()
 	
 		}
 	}
+	//Enemy Collision
+	for (int i = 0; i < idx_Enemy; i++) {
+		for (int j = 0; j < idx_Enemy; j++) {
+			int enemy_x, enemy_y, enemy_w, enemy_h;
+			Enemy[i].GetRect(&enemy_x, &enemy_y, &enemy_w, &enemy_h);
+			int enemy2_x, enemy2_y, enemy2_w, enemy2_h;
+			Enemy[j].GetRect(&enemy2_x, &enemy2_y, &enemy2_w, &enemy2_h);
+			if (((enemy2_x >= enemy_x && enemy2_x <= enemy_w + enemy_x) || (enemy2_w + enemy2_x >= enemy_x && enemy2_w + enemy2_x <= enemy_w + enemy_x)) && ((enemy2_y >= enemy_y && enemy2_y <= enemy_h + enemy_y) || (enemy2_h + enemy2_y >= enemy_y && enemy2_h + enemy2_y <= enemy_h + enemy_y))) {
+				if ((Enemy[i].GetX() + Enemy[i].GetY()) < (Enemy[j].GetX() + Enemy[j].GetY())) {
+					Enemy[j].ChangeCollision();
+				}
+				if ((Enemy[i].GetX() + Enemy[i].GetY()) > (Enemy[j].GetX() + Enemy[j].GetY())) {
+					Enemy[i].ChangeCollision();
+				}
+			}
+
+		}
+	}
 	//Enemy update
 	for (int i = 0; i < idx_Enemy; i++) {
 
-		if (Enemy[i].IsAlive())
+		if (Enemy[i].IsAlive() && Enemy[i].HasCollided() == false)
 		{
 			Enemy[i].Move(((Player.GetX() + 16) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)));
 		}
+		Enemy[i].ChangeCollision();
 	}
 	//Enemy kill
 	for (int i = 0; i < idx_Enemy; i++) {

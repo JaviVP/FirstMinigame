@@ -20,6 +20,7 @@ void Entity::Init(int posx, int posy, int w, int h, int s, int hp, float posx2, 
 	y_shot = posy2;
 	enemyType = et;
 	dead = false;
+	Collision = false;
 }
 void Entity::GetRect(int *posx, int *posy, int *w, int *h)
 {
@@ -63,6 +64,14 @@ bool Entity::IsAlive()
 bool Entity::IsDead()
 {
 	return dead;
+}
+bool Entity::HasCollided()
+{
+	return Collision;
+}
+void Entity::ChangeCollision()
+{
+	Collision = !Collision;
 }
 void Entity::Dead()
 {
