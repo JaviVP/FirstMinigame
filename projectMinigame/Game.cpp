@@ -796,10 +796,10 @@ bool Game::Update()
 			int enemy2_x, enemy2_y, enemy2_w, enemy2_h;
 			Enemy[j].GetRect(&enemy2_x, &enemy2_y, &enemy2_w, &enemy2_h);
 			if (((enemy2_x >= enemy_x && enemy2_x <= enemy_w + enemy_x) || (enemy2_w + enemy2_x >= enemy_x && enemy2_w + enemy2_x <= enemy_w + enemy_x)) && ((enemy2_y >= enemy_y && enemy2_y <= enemy_h + enemy_y) || (enemy2_h + enemy2_y >= enemy_y && enemy2_h + enemy2_y <= enemy_h + enemy_y))) {
-				if ((Enemy[i].GetX() + Enemy[i].GetY()) < (Enemy[j].GetX() + Enemy[j].GetY())) {
+				if ((Enemy[i].GetX() + Enemy[i].GetY()) < (Enemy[j].GetX() + Enemy[j].GetY()) && Enemy[j].HasCollided() == false) {
 					Enemy[j].ChangeCollision();
 				}
-				if ((Enemy[i].GetX() + Enemy[i].GetY()) > (Enemy[j].GetX() + Enemy[j].GetY())) {
+				if ((Enemy[i].GetX() + Enemy[i].GetY()) > (Enemy[j].GetX() + Enemy[j].GetY()) && Enemy[i].HasCollided() == false) {
 					Enemy[i].ChangeCollision();
 				}
 			}
@@ -813,7 +813,9 @@ bool Game::Update()
 		{
 			Enemy[i].Move(((Player.GetX() + 16) - Enemy[i].GetX()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)), (Player.GetY() - Enemy[i].GetY()) / sqrt(pow(Player.GetY() - Enemy[i].GetY(), 2) + pow((Player.GetX() + 16) - Enemy[i].GetX(), 2)));
 		}
-		Enemy[i].ChangeCollision();
+		if (Enemy[i].HasCollided() == true) {
+			Enemy[i].ChangeCollision();
+		}
 	}
 	//Enemy kill
 	for (int i = 0; i < idx_Enemy; i++) {
